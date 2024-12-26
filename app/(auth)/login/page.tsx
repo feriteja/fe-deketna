@@ -1,99 +1,125 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { loginAction } from "@/actions/authaction";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
-  const handleLogin = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent default form behavior
+
+    // Client-Side Validation
+    if (!email || !password) {
+      setError("Please fill in both email and password");
+      return;
+    }
+
+    setIsLoading(true);
     setError("");
 
-    try {
-      const response = await axios.post("http://localhost:8080/signin", {
-        email,
-        password,
-      });
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
 
-      const token = response.data?.data?.Token;
-      if (token) {
-        localStorage.setItem("access_token", token);
-        router.replace("/");
+    try {
+      const result = await loginAction(formData);
+
+      if (result.success) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+        router.push("/");
       } else {
-        throw new Error("Token not found in response.");
+        setError(result.error || "Login failed");
+        toast({
+          title: "Login Failed",
+          description: result.error || "Something went wrong",
+          variant: "destructive",
+        });
       }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Login failed. Please try again."
-      );
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-        {/* Logo */}
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-[#00aa5b]">Deketna</h1>
-          <p className="text-gray-500">Welcome Back!</p>
-        </div>
+      <Card className="w-full max-w-md shadow-md">
+        <CardHeader>
+          <CardTitle className="text-center text-[#00aa5b]">Login</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-4 rounded-md bg-red-100 p-2 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-4 rounded-md bg-red-100 p-2 text-red-700">
-            {error}
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email Field */}
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full bg-[#00aa5b] hover:bg-[#008a4b]"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing In..." : "Sign In"}
+            </Button>
+          </form>
+
+          {/* Footer Links */}
+          <div className="mt-4 text-center text-sm text-gray-600">
+            Don't have an account?{" "}
+            <a href="/register" className="text-[#00aa5b] hover:underline">
+              Register
+            </a>
           </div>
-        )}
-
-        {/* Email Field */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="mt-1 w-full rounded-md border p-2 focus:border-[#00aa5b] focus:ring-[#00aa5b]"
-          />
-        </div>
-
-        {/* Password Field */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="mt-1 w-full rounded-md border p-2 focus:border-[#00aa5b] focus:ring-[#00aa5b]"
-          />
-        </div>
-
-        {/* Login Button */}
-        <button
-          onClick={handleLogin}
-          className="w-full rounded-md bg-[#00aa5b] py-2 text-white hover:bg-[#008a4b]"
-        >
-          Sign In
-        </button>
-
-        {/* Footer Links */}
-        <div className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <Link href="/register" className="text-[#00aa5b] hover:underline">
-            Register
-          </Link>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
