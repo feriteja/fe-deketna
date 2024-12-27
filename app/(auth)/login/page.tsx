@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { loginAction } from "@/actions/authaction";
+import Link from "next/link";
+import { loginAction } from "@/actions/authAction";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -114,9 +115,9 @@ export default function LoginPage() {
           {/* Footer Links */}
           <div className="mt-4 text-center text-sm text-gray-600">
             Don't have an account?{" "}
-            <a href="/register" className="text-[#00aa5b] hover:underline">
+            <Link href="/register" className="text-[#00aa5b] hover:underline">
               Register
-            </a>
+            </Link>
           </div>
         </CardContent>
       </Card>

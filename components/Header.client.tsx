@@ -1,73 +1,27 @@
 // components/HeaderClient.tsx
 "use client";
 
-import { logoutAction } from "@/actions/authaction";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AiOutlineShoppingCart } from "react-icons/ai";
+import { Input } from "./ui/input";
+import { logoutAction } from "@/actions/authAction";
 
 interface HeaderProps {
   token: string | null;
 }
 
 export default function HeaderClient({ token }: HeaderProps) {
-  const [authToken, setAuthToken] = useState<string | null>(token);
-  const router = useRouter();
-
-  // Handle login/logout actions
-  // Logout function to clear localStorage and cookies
-  const logoutHandle = async () => {
-    // Clear token from localStorage
-    localStorage.removeItem("access_token");
-
-    // Optionally, you can make an API call to the server to remove the cookie
-    await logoutAction();
-
-    // Update local state to reflect the logout
-    setAuthToken(null);
-
-    // Redirect the user to the login page after logout
-    router.refresh();
-  };
-  // Effect to sync client-side state with localStorage (for session persistence)
-  useEffect(() => {
-    const savedToken = localStorage.getItem("access_token");
-    if (savedToken && !authToken) {
-      setAuthToken(savedToken);
-    }
-  }, [authToken]);
-
   return (
-    <header className="flex items-center justify-between p-4 bg-gray-800 text-white">
-      <div className="text-xl">Deketna</div>
-
-      <div className="flex space-x-4 items-center">
-        {/* Search Bar */}
-        <SearchBar />
-
-        {/* Cart Button */}
+    <header className="flex items-center justify-between p-4 bg-slate-50 shadow-sm">
+      <div className="text-xl  font-bold">Deketna</div>
+      {/* Search Bar */}
+      <SearchBar />
+      <div className="flex space-x-4  items-center justify-center p-2  divide-x-2 ">
         <CartButton />
 
-        {/* Conditional Login/Logout Button */}
-        {authToken ? (
-          <button onClick={logoutHandle} className="bg-red-500 p-2 rounded-md">
-            Logout
-          </button>
-        ) : (
-          <div className="space-x-2">
-            <button
-              onClick={() => (window.location.href = "/login")}
-              className="bg-blue-500 p-2 rounded-md"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => (window.location.href = "/register")}
-              className="bg-green-500 p-2 rounded-md"
-            >
-              Register
-            </button>
-          </div>
-        )}
+        <ConditionalAuthState token={token} />
       </div>
     </header>
   );
@@ -76,15 +30,60 @@ export default function HeaderClient({ token }: HeaderProps) {
 // Search Bar Component
 function SearchBar() {
   return (
-    <input
+    <Input
       type="text"
-      placeholder="Search products..."
-      className="p-2 rounded"
+      placeholder="Cari di Deketna"
+      className=" w-1/3 border-[1px] focus-visible:ring-transparent focus-visible:border-green-500 border-slate-400"
     />
   );
 }
 
 // Cart Button Component
 function CartButton() {
-  return <button className="bg-yellow-500 p-2 rounded-md">Cart</button>;
+  return <AiOutlineShoppingCart className="" size={24} />;
+}
+
+function ConditionalAuthState({ token }: { token: string | null }) {
+  const [authToken, setAuthToken] = useState<string | null>(token);
+  const router = useRouter();
+
+  const logoutHandle = async () => {
+    localStorage.removeItem("access_token");
+
+    await logoutAction();
+
+    setAuthToken(null);
+
+    router.refresh();
+  };
+  useEffect(() => {
+    const savedToken = localStorage.getItem("access_token");
+    if (savedToken && !authToken) {
+      setAuthToken(savedToken);
+    }
+  }, [authToken]);
+  return (
+    <>
+      {authToken ? (
+        <button onClick={logoutHandle} className="  p-2 rounded-md">
+          Logout
+        </button>
+      ) : (
+        <div className="space-x-2 p-1">
+          <Link
+            href={"/login"}
+            className="bg-white p-2 rounded-md text-green-500 font-bold border-[1px] border-green-500"
+          >
+            Login
+          </Link>
+          <Link
+            href={"/register"}
+            className="bg-green-500 p-2 rounded-md text-white font-bold"
+          >
+            Register
+          </Link>
+        </div>
+      )}
+    </>
+  );
 }
