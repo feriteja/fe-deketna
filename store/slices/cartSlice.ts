@@ -3,52 +3,63 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface CartItem {
   id: number;
-  name: string;
+  product_id: number;
+  product_name: string;
   price: number;
   quantity: number;
+  total_price: number;
+  image_url: string;
 }
 
-interface CartState {
+type CartState = {
   items: CartItem[];
-}
+};
 
-const initialState: CartState =
-  typeof window !== "undefined"
-    ? JSON.parse(localStorage.getItem("cart") || "[]")
-    : [];
+const initialState: CartState = {
+  items: [],
+};
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addItem: (state, action: PayloadAction<CartItem>) => {
-      const existingItem = state.items.find(
-        (item) => item.id === action.payload.id
-      );
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        state.items.push({ ...action.payload, quantity: 1 });
-      }
-      localStorage.setItem("cart", JSON.stringify(state.items));
+    setCart: (state, action: PayloadAction<CartItem[]>) => {
+      console.log("setCart Reducer Called:", action.payload);
+      state.items = action.payload; // ✅ Directly update `items` without extra nesting
     },
+
+    addItem: (state, action: PayloadAction<CartItem>) => {
+      console.log({ payload: action.payload });
+
+      const existingItem = state.items.find(
+        (item) => item.product_id === action.payload.product_id
+      );
+
+      console.log("existingItem", !!existingItem);
+
+      if (existingItem) {
+        existingItem.quantity += action.payload.quantity || 1;
+      } else {
+        console.log("ikut >?");
+
+        state.items.push({
+          ...action.payload,
+          quantity: action.payload.quantity || 1,
+        });
+      }
+
+      console.log("Updated Cart State:", state.items);
+    },
+
     removeItem: (state, action: PayloadAction<number>) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
-      localStorage.setItem("cart", JSON.stringify(state.items));
     },
+
     clearCart: (state) => {
       state.items = [];
-      localStorage.removeItem("cart");
-    },
-    loadCart: (state) => {
-      state.items = JSON.parse(localStorage.getItem("cart") || "[]");
-    },
-    setCart: (state, action: PayloadAction<CartState>) => {
-      state.items = action.payload.items;
     },
   },
 });
 
-export const { addItem, removeItem, clearCart, loadCart, setCart } =
-  cartSlice.actions;
+export const { setCart, addItem, removeItem, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

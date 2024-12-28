@@ -1,3 +1,7 @@
+"use server";
+
+import axios from "axios";
+
 // app/dashboard/actions.ts
 
 export interface Product {

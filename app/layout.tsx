@@ -5,7 +5,8 @@ import "./globals.css";
 import { Provider, useDispatch } from "react-redux";
 import { store } from "../store";
 import { useEffect } from "react";
-import { loadCart, setCart } from "@/store/slices/cartSlice";
+import { setCart } from "@/store/slices/cartSlice";
+import axios from "axios";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +27,8 @@ export default function RootLayout({
     // Save cart state to localStorage whenever it changes
     const unsubscribe = store.subscribe(() => {
       const state = store.getState();
-      localStorage.setItem("cart", JSON.stringify(state.cart));
+
+      localStorage.setItem("cart", JSON.stringify(state.cart.items));
     });
 
     return () => unsubscribe();
@@ -46,18 +48,57 @@ export default function RootLayout({
   );
 }
 
-// Separate Loader Component for clarity
 function CartLoader() {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    // Simulate cart loading (e.g., from localStorage or API)
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      dispatch(setCart(JSON.parse(savedCart)));
-    } else {
-      dispatch(loadCart());
+  // Fetch cart data from the API
+  const getCart = async () => {
+    try {
+      const accessToken = localStorage.getItem("access_token");
+      if (!accessToken) {
+        console.warn("No access token found");
+        return [];
+      }
+
+      const response = await axios.get(
+        `http://localhost:8080/cart?page=1&limit=1000`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      console.log("API Cart Data:", response.data?.data || []);
+      return response.data?.data || [];
+    } catch (error) {
+      console.error("Failed to fetch cart:", error);
+      return [];
     }
+  };
+
+  // Load cart data on component mount
+  useEffect(() => {
+    const loadCart = async () => {
+      const savedCart = localStorage.getItem("cart");
+
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart);
+
+        dispatch(setCart(parsedCart));
+      } else {
+        const cartData = await getCart();
+
+        if (Array.isArray(cartData) && cartData.length > 0) {
+          dispatch(setCart(cartData));
+          localStorage.setItem("cart", JSON.stringify(cartData)); // ✅ Save cartData directly
+        } else {
+          dispatch(setCart([])); // Explicitly set an empty cart
+        }
+      }
+    };
+
+    loadCart();
   }, [dispatch]);
 
   return null; // This component doesn't render anything
