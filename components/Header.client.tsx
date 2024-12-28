@@ -40,7 +40,11 @@ function SearchBar() {
 
 // Cart Button Component
 function CartButton() {
-  return <AiOutlineShoppingCart className="" size={24} />;
+  return (
+    <Link href={"/cart"}>
+      <AiOutlineShoppingCart className="" size={24} />
+    </Link>
+  );
 }
 
 function ConditionalAuthState({ token }: { token: string | null }) {

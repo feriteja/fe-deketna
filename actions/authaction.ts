@@ -21,7 +21,7 @@ export async function loginAction(formData: FormData) {
         sameSite: "strict",
         path: "/",
       });
-      return { success: true };
+      return { success: true, token };
     } else {
       return { success: false, error: response.data.message || "Login failed" };
     }

@@ -42,6 +42,7 @@ export default function LoginPage() {
           title: "Login Successful",
           description: "Welcome back!",
         });
+        localStorage.setItem("access_token", result.token);
         router.push("/");
       } else {
         setError(result.error || "Login failed");
