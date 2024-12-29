@@ -24,24 +24,17 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     setCart: (state, action: PayloadAction<CartItem[]>) => {
-      console.log("setCart Reducer Called:", action.payload);
       state.items = action.payload; // ✅ Directly update `items` without extra nesting
     },
 
     addItem: (state, action: PayloadAction<CartItem>) => {
-      console.log({ payload: action.payload });
-
       const existingItem = state.items.find(
         (item) => item.product_id === action.payload.product_id
       );
 
-      console.log("existingItem", !!existingItem);
-
       if (existingItem) {
         existingItem.quantity += action.payload.quantity || 1;
       } else {
-        console.log("ikut >?");
-
         state.items.push({
           ...action.payload,
           quantity: action.payload.quantity || 1,

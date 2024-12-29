@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
+import { compressImage, convertToWebP } from "@/utils/imageConverterWebp";
 
 // ✅ Zod Schema for Validation
 const formSchema = z.object({
@@ -26,6 +27,7 @@ export default function AddProductPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const accessToken = localStorage.getItem("access_token");
+  const [image, setImage] = useState<string | null>(null);
 
   const {
     register,
@@ -54,17 +56,21 @@ export default function AddProductPage() {
   // ✅ Submit Handler
   const onSubmit = async (data: FormSchema) => {
     try {
+      if (!data.image) return;
+
       setLoading(true);
       setError(null);
       setSuccess(null);
 
+      const compressedFile = await compressImage(data.image!);
+      const webpImage = await convertToWebP(compressedFile);
+
+      const imagename = data.image.name.split(".")[0];
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("price", String(data.price));
       formData.append("stock", String(data.stock));
-      if (data.image) {
-        formData.append("image", data.image); // Attach file
-      }
+      formData.append("image", webpImage, `${imagename}.webp`); // Attach file
 
       await axios.post("http://localhost:8080/admin/product", formData, {
         headers: {
@@ -93,7 +99,12 @@ export default function AddProductPage() {
         {/* Product Name */}
         <div>
           <Label htmlFor="name">Product Name</Label>
-          <Input id="name" placeholder="Product Name" {...register("name")} />
+          <Input
+            required
+            id="name"
+            placeholder="Product Name"
+            {...register("name")}
+          />
           {errors.name && (
             <p className="text-red-500 text-sm">{errors.name.message}</p>
           )}
@@ -103,6 +114,7 @@ export default function AddProductPage() {
         <div>
           <Label htmlFor="price">Price</Label>
           <Input
+            required
             id="price"
             type="number"
             placeholder="Price"
@@ -117,6 +129,7 @@ export default function AddProductPage() {
         <div>
           <Label htmlFor="stock">Stock</Label>
           <Input
+            required
             id="stock"
             type="number"
             placeholder="Stock"
@@ -130,6 +143,7 @@ export default function AddProductPage() {
         {/* Image Upload */}
         <div>
           <Label htmlFor="image">Product Image</Label>
+          {/* {imageFile && <img src={imageFile.} alt="Preview" />} */}
           <div
             {...getRootProps()}
             className={`border-2 border-dashed p-6 rounded-md text-center cursor-pointer ${
