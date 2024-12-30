@@ -13,7 +13,7 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-white shadow-md h-full p-4">
+    <aside className="w-64 bg-white shadow-md min-h-screen p-4">
       <h1 className="text-xl font-bold mb-6">Admin Dashboard</h1>
       <ul>
         {menuItems.map((item) => (

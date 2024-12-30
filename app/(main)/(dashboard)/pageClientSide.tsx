@@ -2,6 +2,7 @@
 
 import ProductCard from "@/components/ProductCard";
 import { useState, useEffect, useCallback } from "react";
+import debounce from "lodash.debounce";
 
 interface Product {
   id: number;
@@ -40,7 +41,15 @@ export default function ClientDashboard({
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/products?page=${page + 1}&limit=10`);
+      const response = await fetch(
+        `http://localhost:8080/products?page=${page + 1}&limit=20`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+          },
+        }
+      );
       if (response.ok) {
         const data: ProductResponse = await response.json();
         setProducts((prev) => [...prev, ...data.data]);
@@ -55,14 +64,16 @@ export default function ClientDashboard({
   }, [isLoading, hasMore, page]);
 
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = debounce(() => {
       if (
-        window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 200
+        window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 100 &&
+        !isLoading &&
+        hasMore
       ) {
         loadMoreProducts();
       }
-    };
+    }, 300); // 300ms delay
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);

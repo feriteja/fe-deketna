@@ -17,9 +17,12 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cookies } from "next/headers";
+import Link from "next/link";
+import Image from "next/image";
 
 interface Product {
   id: number;
+  image_url: string;
   name: string;
   stock: number;
   price: number;
@@ -74,6 +77,7 @@ export default async function ProductListPage({
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
+            <TableHead>Image</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Stock</TableHead>
             <TableHead>Price</TableHead>
@@ -86,6 +90,14 @@ export default async function ProductListPage({
           {products.map((product) => (
             <TableRow key={product.id}>
               <TableCell>{product.id}</TableCell>
+              <TableCell>
+                <Image
+                  src={product.image_url}
+                  height={40}
+                  width={40}
+                  alt={product.name}
+                />
+              </TableCell>
               <TableCell>{product.name}</TableCell>
               <TableCell>{product.stock}</TableCell>
               <TableCell>${product.price}</TableCell>
@@ -93,7 +105,7 @@ export default async function ProductListPage({
               <TableCell>{product.seller.name}</TableCell>
               <TableCell>
                 <Button variant="outline" className="mr-2">
-                  Edit
+                  <Link href={`/admin/edit-product/${product.id}`}>Edit</Link>
                 </Button>
                 <Button variant="destructive">Delete</Button>
               </TableCell>
