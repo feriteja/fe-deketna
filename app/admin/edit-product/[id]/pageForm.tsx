@@ -16,6 +16,7 @@ const formSchema = z.object({
   name: z.string().min(1, { message: "Product name is required" }),
   price: z.number().min(1, { message: "Price must be greater than 0" }),
   stock: z.number().min(1, { message: "Stock must be greater than 0" }),
+  category_id: z.number().min(1, { message: "Stock must be greater than 0" }),
   image: z.instanceof(File).optional(), // Ensure `File` is uploaded
 });
 
@@ -42,6 +43,12 @@ export default function EditProductForm({ data }: { data: ProductType }) {
     reset,
     setValue,
   } = useForm<FormSchema>({
+    defaultValues: {
+      name: data.name,
+      price: data.price,
+      stock: data.stock,
+      category_id: data.category.id,
+    },
     resolver: zodResolver(formSchema),
   });
 
@@ -62,34 +69,36 @@ export default function EditProductForm({ data }: { data: ProductType }) {
 
   const onSubmit = async (dataForm: FormSchema) => {
     try {
-      if (!dataForm.image) return;
-
       setLoading(true);
       setError(null);
       setSuccess(null);
 
-      const compressedFile = await compressImage(dataForm.image!);
-      const webpImage = await convertToWebP(compressedFile);
-
-      const imagename = dataForm.image.name.split(".")[0];
       const formData = new FormData();
       formData.append("name", dataForm.name);
       formData.append("price", String(dataForm.price));
       formData.append("stock", String(dataForm.stock));
-      formData.append(
-        "image",
-        webpImage,
-        `${new Date().getMilliseconds()}- ${imagename}.webp`
-      ); // Attach file
+      formData.append("category_id", String(dataForm.category_id));
+      if (dataForm.image) {
+        const compressedFile = await compressImage(dataForm.image!);
+        const webpImage = await convertToWebP(compressedFile);
 
-      await axios.post("http://localhost:8080/admin/product", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+        const imagename = dataForm.image.name.split(".")[0];
 
-      setSuccess("Product added successfully!");
+        formData.append("image", webpImage, `${new Date()}- ${imagename}.webp`); // Attach file
+      }
+
+      await axios.put(
+        `http://localhost:8080/admin/product/${data.id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      setSuccess("Product edited successfully!");
       reset(); // Clear the form
       setImageFile(null);
     } catch (err: any) {
@@ -102,7 +111,7 @@ export default function EditProductForm({ data }: { data: ProductType }) {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-md shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Add Product</h1>
+      <h1 className="text-2xl font-bold mb-4">Edit Product</h1>
       {error && <p className="text-red-500">{error}</p>}
       {success && <p className="text-green-500">{success}</p>}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -111,7 +120,6 @@ export default function EditProductForm({ data }: { data: ProductType }) {
           <Label htmlFor="name">Product Name</Label>
           <Input
             required
-            value={data.name}
             id="name"
             placeholder="Product Name"
             {...register("name")}
@@ -126,11 +134,25 @@ export default function EditProductForm({ data }: { data: ProductType }) {
           <Label htmlFor="price">Price</Label>
           <Input
             required
-            value={data.price}
             id="price"
             type="number"
             placeholder="Price"
             {...register("price", { valueAsNumber: true })}
+          />
+          {errors.price && (
+            <p className="text-red-500 text-sm">{errors.price.message}</p>
+          )}
+        </div>
+
+        {/* Category */}
+        <div>
+          <Label htmlFor="price">Cateogry</Label>
+          <Input
+            required
+            id="category_id"
+            type="number"
+            placeholder="Category id"
+            {...register("category_id", { valueAsNumber: true })}
           />
           {errors.price && (
             <p className="text-red-500 text-sm">{errors.price.message}</p>
@@ -142,7 +164,6 @@ export default function EditProductForm({ data }: { data: ProductType }) {
           <Label htmlFor="stock">Stock</Label>
           <Input
             required
-            value={data.stock}
             id="stock"
             type="number"
             placeholder="Stock"
