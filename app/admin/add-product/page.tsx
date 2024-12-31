@@ -70,8 +70,10 @@ export default function AddProductPage() {
       formData.append("name", data.name);
       formData.append("price", String(data.price));
       formData.append("stock", String(data.stock));
-      formData.append("image", webpImage, `${imagename}.webp`); // Attach file
+      formData.append("category_id", String(data.stock));
+      const unixTimestamp = Math.floor(Date.now() / 1000); // Get Unix timestamp in seconds
 
+      formData.append("image", webpImage, `${unixTimestamp}-${imagename}.webp`);
       await axios.post("http://localhost:8080/admin/product", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -133,6 +135,21 @@ export default function AddProductPage() {
             id="stock"
             type="number"
             placeholder="Stock"
+            {...register("stock", { valueAsNumber: true })}
+          />
+          {errors.stock && (
+            <p className="text-red-500 text-sm">{errors.stock.message}</p>
+          )}
+        </div>
+
+        {/* CategoryId */}
+        <div>
+          <Label htmlFor="stock">Category</Label>
+          <Input
+            required
+            id="category_id"
+            type="number"
+            placeholder="Category"
             {...register("stock", { valueAsNumber: true })}
           />
           {errors.stock && (

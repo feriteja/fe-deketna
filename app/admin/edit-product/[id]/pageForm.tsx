@@ -84,7 +84,13 @@ export default function EditProductForm({ data }: { data: ProductType }) {
 
         const imagename = dataForm.image.name.split(".")[0];
 
-        formData.append("image", webpImage, `${new Date()}- ${imagename}.webp`); // Attach file
+        const unixTimestamp = Math.floor(Date.now() / 1000); // Get Unix timestamp in seconds
+
+        formData.append(
+          "image",
+          webpImage,
+          `${unixTimestamp}-${imagename}.webp`
+        );
       }
 
       await axios.put(
@@ -200,7 +206,7 @@ export default function EditProductForm({ data }: { data: ProductType }) {
 
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Adding Product..." : "Add Product"}
+          {loading ? "Editing Product..." : "Edit Product"}
         </Button>
       </form>
     </div>

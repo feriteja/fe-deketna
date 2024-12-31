@@ -40,8 +40,6 @@ const cartSlice = createSlice({
           quantity: action.payload.quantity || 1,
         });
       }
-
-      console.log("Updated Cart State:", state.items);
     },
 
     removeItem: (state, action: PayloadAction<number>) => {

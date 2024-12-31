@@ -46,8 +46,6 @@ export default function ProductCardButton({ product }: ProductCardProps) {
           image_url: product.image_url,
         })
       );
-
-      console.log("Item added to cart successfully");
     } catch (error) {
       console.error("Failed to add item to cart:", error);
     }

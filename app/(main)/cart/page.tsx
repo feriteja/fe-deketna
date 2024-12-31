@@ -3,6 +3,7 @@
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../../store";
 import { removeItem, clearCart } from "../../../store/slices/cartSlice";
+import Image from "next/image";
 
 export default function CartPage() {
   const cart = useSelector((state: RootState) => state.cart.items);
@@ -13,7 +14,7 @@ export default function CartPage() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
-      {/* {cart.length === 0 ? (
+      {cart.length === 0 ? (
         <p>Your cart is empty.</p>
       ) : (
         <>
@@ -24,8 +25,14 @@ export default function CartPage() {
                   key={item.id}
                   className="flex justify-between items-center border-b py-2"
                 >
+                  <Image
+                    src={item.image_url}
+                    width={80}
+                    height={80}
+                    alt={item.product_name}
+                  />
                   <div>
-                    <h3>{item.name}</h3>
+                    <h3>{item.product_name}</h3>
                     <p>Quantity: {item.quantity}</p>
                     <p>Price: ${item.price}</p>
                   </div>
@@ -45,7 +52,7 @@ export default function CartPage() {
             Clear Cart
           </button>
         </>
-      )} */}
+      )}
     </div>
   );
 }

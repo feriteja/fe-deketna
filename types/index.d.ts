@@ -22,3 +22,24 @@ declare interface CategoryMinType {
   name: string;
   description: string;
 }
+
+declare interface ProfileType {
+  address: string;
+  created_at: string;
+  id: number;
+  image_url: string;
+  name: string;
+  updated_at: string;
+  user: UserType;
+  user_id: number;
+}
+
+declare interface UserType {
+  created_at: string;
+  deleted_at: string;
+  email: string;
+  id: number;
+  phone: string;
+  role: string;
+  updated_at: string;
+}
