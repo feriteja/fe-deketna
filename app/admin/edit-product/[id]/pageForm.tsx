@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { compressImage, convertToWebP } from "@/utils/imageConverterWebp";
+import { useRouter } from "next/navigation";
 
 // ✅ Zod Schema for Validation
 const formSchema = z.object({
@@ -29,6 +30,7 @@ export default function EditProductForm({ data }: { data: ProductType }) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [image, setImage] = useState<string | null>(data.image_url);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Safely access localStorage on client-side
@@ -47,7 +49,7 @@ export default function EditProductForm({ data }: { data: ProductType }) {
       name: data.name,
       price: data.price,
       stock: data.stock,
-      category_id: data.category.id,
+      category_id: data.category_id,
     },
     resolver: zodResolver(formSchema),
   });
@@ -75,10 +77,15 @@ export default function EditProductForm({ data }: { data: ProductType }) {
 
       const formData = new FormData();
       formData.append("name", dataForm.name);
+      setValue("name", dataForm.name);
       formData.append("price", String(dataForm.price));
+      setValue("price", dataForm.price);
       formData.append("stock", String(dataForm.stock));
+      setValue("stock", dataForm.stock);
       formData.append("category_id", String(dataForm.category_id));
+      setValue("category_id", dataForm.category_id);
       if (dataForm.image) {
+        setValue("image", dataForm.image);
         const compressedFile = await compressImage(dataForm.image!);
         const webpImage = await convertToWebP(compressedFile);
 
@@ -107,6 +114,7 @@ export default function EditProductForm({ data }: { data: ProductType }) {
       setSuccess("Product edited successfully!");
       reset(); // Clear the form
       setImageFile(null);
+      router.replace("/admin/list-product");
     } catch (err: any) {
       console.error(err);
       setError("Failed to add product. Please try again.");

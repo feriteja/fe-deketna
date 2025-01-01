@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import EditProductForm from "./pageForm";
 
-export default async function AddProductPage({ params }: { params: any }) {
+export default async function EditProductPage({ params }: { params: any }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value || null; // Fetch token from cookies
   const { id } = await params;

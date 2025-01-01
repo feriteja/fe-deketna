@@ -4,6 +4,7 @@ declare interface ProductType {
   price: number;
   stock: number;
   seller_id: number;
+  category_id: number;
   image_url: string;
   created_at: string;
   updated_at: string;

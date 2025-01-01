@@ -37,7 +37,6 @@ export default function ProductCardButton({ product }: ProductCardProps) {
 
       dispatch(
         addItem({
-          id: cartItem?.data?.data?.cart_id,
           product_name: product.name,
           price: product.price,
           quantity: 1,

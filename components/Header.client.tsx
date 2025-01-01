@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useCart } from "@/hooks/useCart";
 
 interface HeaderProps {
   token: string | null;
@@ -25,6 +26,11 @@ interface HeaderProps {
 }
 
 export default function HeaderClient({ token, profile }: HeaderProps) {
+  const { reloadCart } = useCart();
+  useEffect(() => {
+    reloadCart();
+  }, []);
+
   return (
     <header className="flex items-center justify-between p-4 bg-slate-50 shadow-sm">
       <Link href={"/"}>
@@ -54,8 +60,13 @@ function SearchBar() {
 
 // Cart Button Component
 function CartButton() {
+  const { cartItems } = useCart();
+
   return (
-    <Link href={"/cart"}>
+    <Link href={"/cart"} className="relative ">
+      <div className="absolute -right-2 -top-2 bg-red-600 rounded-xl text-xs font-bold text-white bg-opacity-70 px-1">
+        {cartItems.length > 0 && cartItems.length}
+      </div>
       <AiOutlineShoppingCart className="" size={24} />
     </Link>
   );
@@ -70,13 +81,14 @@ function ConditionalAuthState({
 }) {
   const [authToken, setAuthToken] = useState<string | null>(token);
   const router = useRouter();
+  const { clearItemsCart } = useCart();
 
   const logoutHandle = async () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("cart");
 
     await logoutAction();
-
+    clearItemsCart();
     setAuthToken(null);
 
     router.replace("/");
@@ -123,6 +135,7 @@ export function DropdownMenuUser({ profile, logoutHandle }: any) {
               src={"/deketna-maskot.webp"}
               alt="profile image"
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover"
             />
           </div>

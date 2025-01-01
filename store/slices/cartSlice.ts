@@ -1,18 +1,18 @@
 // store/cartSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface CartItem {
-  id: number;
+export interface ReduxCartItem {
   product_id: number;
   product_name: string;
   price: number;
   quantity: number;
   total_price: number;
   image_url: string;
+  isSelected?: boolean;
 }
 
-type CartState = {
-  items: CartItem[];
+export type CartState = {
+  items: ReduxCartItem[];
 };
 
 const initialState: CartState = {
@@ -23,11 +23,11 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    setCart: (state, action: PayloadAction<CartItem[]>) => {
+    setCart: (state, action: PayloadAction<ReduxCartItem[]>) => {
       state.items = action.payload; // ✅ Directly update `items` without extra nesting
     },
 
-    addItem: (state, action: PayloadAction<CartItem>) => {
+    addItem: (state, action: PayloadAction<ReduxCartItem>) => {
       const existingItem = state.items.find(
         (item) => item.product_id === action.payload.product_id
       );
@@ -42,8 +42,26 @@ const cartSlice = createSlice({
       }
     },
 
+    selectCartItem: (state, action: PayloadAction<number>) => {
+      const existingItem = state.items.find(
+        (item) => item.product_id === action.payload
+      );
+
+      if (existingItem) {
+        existingItem.isSelected = !existingItem.isSelected;
+      }
+    },
+
+    selectCartItemAll: (state, action: PayloadAction<boolean>) => {
+      state.items.forEach((item) => {
+        item.isSelected = action.payload;
+      });
+    },
+
     removeItem: (state, action: PayloadAction<number>) => {
-      state.items = state.items.filter((item) => item.id !== action.payload);
+      state.items = state.items.filter(
+        (item) => item.product_id !== action.payload
+      );
     },
 
     clearCart: (state) => {
@@ -52,5 +70,12 @@ const cartSlice = createSlice({
   },
 });
 
-export const { setCart, addItem, removeItem, clearCart } = cartSlice.actions;
+export const {
+  setCart,
+  addItem,
+  removeItem,
+  clearCart,
+  selectCartItem,
+  selectCartItemAll,
+} = cartSlice.actions;
 export default cartSlice.reducer;
