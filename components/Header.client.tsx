@@ -152,7 +152,11 @@ export function DropdownMenuUser({ profile, logoutHandle }: any) {
               Profile
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuItem className="cursor-pointer">Order</DropdownMenuItem>
+          <Link href={"/orders"}>
+            <DropdownMenuItem className="cursor-pointer">
+              Order
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuSeparator />

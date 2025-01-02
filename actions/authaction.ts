@@ -18,6 +18,8 @@ export async function loginAction(formData: FormData) {
       (await cookies()).set("access_token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        expires: 3 * 24 * 60 * 60, // 3 days in seconds,
+        maxAge: 3 * 24 * 60 * 60, // 3 days in seconds
         sameSite: "strict",
         path: "/",
       });
