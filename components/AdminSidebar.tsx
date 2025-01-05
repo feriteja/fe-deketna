@@ -9,7 +9,7 @@ export default function AdminSidebar() {
   const menuItems = [
     { name: "Add Product", path: "/admin/add-product" },
     { name: "List Product", path: "/admin/list-product" },
-    { name: "List Order", path: "/admin/list-order" },
+    { name: "List Order", path: "/admin/order" },
   ];
 
   return (
