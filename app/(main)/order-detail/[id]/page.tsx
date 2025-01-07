@@ -66,7 +66,7 @@ export default async function OrderDetailPage({
     const res = await fetchOrderDetails(id);
     order = res.data;
   } catch (err: any) {
-    console.log(err);
+    console.err(err);
     error = err.message || "Something went wrong";
   }
 

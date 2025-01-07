@@ -4,8 +4,9 @@
 import { logoutAction } from "@/actions/authAction";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useRouter as useRouter2 } from "next/router";
+import { useEffect, useRef, useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { Input } from "./ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ interface Product {
   seller_name: string;
 }
 
-export default function HeaderClient({ token, profile }: HeaderProps) {
+export default function HeaderClient({ token }: HeaderProps) {
   const { reloadCart } = useCart();
   useEffect(() => {
     reloadCart();
@@ -65,7 +66,9 @@ function SearchBar() {
   const [search, setSearch] = useState("");
   const [productPriview, setProductPriview] = useState<Product[]>([]);
   const debouncedSearch = useDebounce(search, 800); // 500ms debounce delay
+  const abortControllerRef = useRef<AbortController | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   const cardClikHandler = (id: number) => {
     setSearch("");
@@ -75,15 +78,28 @@ function SearchBar() {
 
   useEffect(() => {
     if (debouncedSearch) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
       // Call your API with debouncedSearch
       fetch(
-        `http://localhost:8080/products?search_product=${encodeURIComponent(
-          debouncedSearch
-        )}`
+        `http://localhost:8080/products?search_product=${debouncedSearch}`,
+        {
+          signal: abortControllerRef.current.signal,
+        }
       )
         .then((res) => res.json())
         .then((data) => {
           setProductPriview(data.data);
+        })
+        .catch((e) => {
+          if (e.name === "AbortError") {
+            console.error("Fetch aborted");
+          } else {
+            console.error("Error:", e);
+          }
         });
     }
   }, [debouncedSearch]);
@@ -91,8 +107,14 @@ function SearchBar() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form behavior
 
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    setSearch("");
     setProductPriview([]);
-    refreshSearch();
+    // refreshSearch();
+
     router.push(`/search?q=${search}`);
   };
 
@@ -108,15 +130,20 @@ function SearchBar() {
           className=" w-full border-[1px] focus-visible:ring-transparent focus-visible:border-green-500 border-slate-400"
         />
       </form>
-      <div className="absolute z-50 right-0 left-0 mt-1 shadow-md px-2 py-1 space-y-1 divide-y-2  bg-white">
-        {productPriview?.slice(0, 3).map((product) => (
-          <SearchCard
-            key={product.id}
-            onClick={() => cardClikHandler(product.id)}
-            product={product}
-          />
-        ))}
-      </div>
+      {productPriview.length > 0 && (
+        <div className="absolute z-50 right-0 left-0 mt-1 shadow-md px-2 py-1 space-y-1 divide-y-2  bg-white">
+          {productPriview &&
+            productPriview
+              ?.slice(0, 3)
+              .map((product) => (
+                <SearchCard
+                  key={product.id}
+                  onClick={() => cardClikHandler(product.id)}
+                  product={product}
+                />
+              ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import ProductCard from "@/components/ProductCard";
 import debounce from "lodash.debounce";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 interface Product {
@@ -36,6 +37,8 @@ export default function ClientDashboard({
   const [hasMore, setHasMore] = useState<boolean>(
     initialData.pagination.isNext
   );
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Infinite Scroll Logic
   const loadMoreProducts = useCallback(async () => {
@@ -65,7 +68,7 @@ export default function ClientDashboard({
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, hasMore, page]);
+  }, [isLoading, hasMore, page, keyword]);
 
   useEffect(() => {
     const handleScroll = debounce(() => {
@@ -85,9 +88,7 @@ export default function ClientDashboard({
 
   useEffect(() => {
     setProducts(initialData.data);
-  }, [keyword]);
-
-  // console.log({ product: products?.slice(0, 4), keyword });
+  }, [keyword, router]);
 
   return (
     <div className="p-4">
