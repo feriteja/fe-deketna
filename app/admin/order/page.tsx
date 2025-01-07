@@ -24,7 +24,7 @@ export interface Order {
 }
 
 interface OrdersPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 async function getOrders({ page }: { page: number }) {

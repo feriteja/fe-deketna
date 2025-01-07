@@ -64,9 +64,9 @@ async function fetchOrders(page: number = 1): Promise<ApiResponse> {
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const currentPage = Number(searchParams.page) || 1;
+  const currentPage = Number((await searchParams).page) || 1;
   let orders: Order[] = [];
   let pagination: Pagination | null = null;
   let error: string | null = null;

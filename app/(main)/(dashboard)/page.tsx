@@ -6,7 +6,7 @@ import ClientDashboard from "./pageClientSide";
 // ✅ Server-Side Function to Fetch Initial Data
 async function getInitialProducts() {
   try {
-    const initialData = await fetchProducts(1);
+    const initialData = await fetchProducts(1, "");
     return initialData;
   } catch (error) {
     console.error("Failed to fetch initial products:", error);
@@ -18,5 +18,5 @@ async function getInitialProducts() {
 export default async function DashboardPage() {
   const initialData = await getInitialProducts();
 
-  return <ClientDashboard initialData={initialData} />;
+  return <ClientDashboard initialData={initialData} keyword="" />;
 }

@@ -54,6 +54,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError("An unexpected error occurred");
+      console.log(err);
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +116,7 @@ export default function LoginPage() {
 
           {/* Footer Links */}
           <div className="mt-4 text-center text-sm text-gray-600">
-            Don't have an account?{" "}
+            Don't have an account?
             <Link href="/register" className="text-[#00aa5b] hover:underline">
               Register
             </Link>

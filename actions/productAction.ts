@@ -1,6 +1,7 @@
 "use server";
 
 import axios from "axios";
+import { revalidatePath } from "next/cache";
 
 // app/dashboard/actions.ts
 
@@ -29,12 +30,14 @@ export interface ProductResponse {
 
 // Fetch products from the backend
 export async function fetchProducts(
-  page: number = 1
+  page: number = 1,
+  keyword: string
 ): Promise<ProductResponse> {
   const res = await fetch(
-    `http://localhost:8080/products?page=${page}&limit=20`,
+    `http://localhost:8080/products?page=${page}&limit=20&search_product=${keyword}`,
     {
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
+      // next: { revalidate: 60 }, // Revalidate every 60 seconds
+      cache: "no-store",
     }
   );
 
@@ -43,4 +46,8 @@ export async function fetchProducts(
   }
 
   return res.json();
+}
+
+export async function refreshSearch() {
+  revalidatePath("/search");
 }

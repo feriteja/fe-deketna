@@ -35,7 +35,7 @@ interface Product {
 }
 
 interface ProductListPageProps {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
   params: any;
 }
 

@@ -22,7 +22,7 @@ export default function ProductCardButton({ product }: ProductCardProps) {
   const handleAddToCart = async () => {
     try {
       // Call API to add item to server-side cart
-      const cartItem = await axios.post(
+      await axios.post(
         `http://localhost:8080/cart`,
         {
           product_id: product.id,

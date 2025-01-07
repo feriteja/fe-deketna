@@ -32,11 +32,11 @@ async function fetchOrderDetail(orderId: string, token: string) {
 export default async function OrderDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value || null; // Fetch token from cookies
-  const order = await fetchOrderDetail(params.id, token!);
+  const order = await fetchOrderDetail((await params).id, token!);
 
   return (
     <div className="p-6 space-y-6 bg-white rounded-md shadow-md">

@@ -19,10 +19,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCart } from "@/hooks/useCart";
+import { useDebounce } from "@/hooks/useDebounce";
+import SearchCard from "./SearchCard";
+import { refreshSearch } from "@/actions/productAction";
 
 interface HeaderProps {
   token: string | null;
   profile: any;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  stock: number;
+  image_url: string;
+  seller_id: number;
+  seller_name: string;
 }
 
 export default function HeaderClient({ token, profile }: HeaderProps) {
@@ -41,7 +54,7 @@ export default function HeaderClient({ token, profile }: HeaderProps) {
       <div className="flex space-x-4  items-center justify-center p-2  divide-x-2 ">
         <CartButton />
 
-        <ConditionalAuthState token={token} profile={profile} />
+        <ConditionalAuthState token={token} />
       </div>
     </header>
   );
@@ -49,12 +62,62 @@ export default function HeaderClient({ token, profile }: HeaderProps) {
 
 // Search Bar Component
 function SearchBar() {
+  const [search, setSearch] = useState("");
+  const [productPriview, setProductPriview] = useState<Product[]>([]);
+  const debouncedSearch = useDebounce(search, 800); // 500ms debounce delay
+  const router = useRouter();
+
+  const cardClikHandler = (id: number) => {
+    setSearch("");
+    setProductPriview([]);
+    router.push(`/product/${id}`);
+  };
+
+  useEffect(() => {
+    if (debouncedSearch) {
+      // Call your API with debouncedSearch
+      fetch(
+        `http://localhost:8080/products?search_product=${encodeURIComponent(
+          debouncedSearch
+        )}`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setProductPriview(data.data);
+        });
+    }
+  }, [debouncedSearch]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent default form behavior
+
+    setProductPriview([]);
+    refreshSearch();
+    router.push(`/search?q=${search}`);
+  };
+
   return (
-    <Input
-      type="text"
-      placeholder="Cari di Deketna"
-      className=" w-1/3 border-[1px] focus-visible:ring-transparent focus-visible:border-green-500 border-slate-400"
-    />
+    <div className="w-1/3 relative">
+      <form onSubmit={handleSubmit}>
+        <Input
+          autoFocus={false} // Explicitly disable autofocus
+          type="text"
+          value={search}
+          placeholder="Cari di Deketna"
+          onChange={(e) => setSearch(e.target.value)}
+          className=" w-full border-[1px] focus-visible:ring-transparent focus-visible:border-green-500 border-slate-400"
+        />
+      </form>
+      <div className="absolute z-50 right-0 left-0 mt-1 shadow-md px-2 py-1 space-y-1 divide-y-2  bg-white">
+        {productPriview?.slice(0, 3).map((product) => (
+          <SearchCard
+            key={product.id}
+            onClick={() => cardClikHandler(product.id)}
+            product={product}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -72,13 +135,7 @@ function CartButton() {
   );
 }
 
-function ConditionalAuthState({
-  token,
-  profile,
-}: {
-  token: string | null;
-  profile: any;
-}) {
+function ConditionalAuthState({ token }: { token: string | null }) {
   const [authToken, setAuthToken] = useState<string | null>(token);
   const router = useRouter();
   const { clearItemsCart } = useCart();
@@ -103,7 +160,7 @@ function ConditionalAuthState({
     <>
       {authToken ? (
         <>
-          <DropdownMenuUser profile={profile} logoutHandle={logoutHandle} />
+          <DropdownMenuUser logoutHandle={logoutHandle} />
         </>
       ) : (
         <div className="space-x-2 p-1">
@@ -125,7 +182,11 @@ function ConditionalAuthState({
   );
 }
 
-export function DropdownMenuUser({ profile, logoutHandle }: any) {
+export function DropdownMenuUser({
+  logoutHandle,
+}: {
+  logoutHandle: () => void;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

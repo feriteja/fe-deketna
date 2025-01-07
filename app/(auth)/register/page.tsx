@@ -53,6 +53,7 @@ export default function RegisterPage() {
       }
     } catch (err) {
       setError("An unexpected error occurred");
+      console.log(err);
     } finally {
       setIsLoading(false);
     }

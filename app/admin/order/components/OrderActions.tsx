@@ -38,8 +38,6 @@ export default function OrderActions({
       ? ORDER_SEQUENCE[ORDER_SEQUENCE.length - 1]
       : ORDER_SEQUENCE[currentIndex + 1];
 
-  console.log({ showStatus });
-
   return (
     <div className="flex gap-2">
       <Button

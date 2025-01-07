@@ -19,7 +19,7 @@ async function fetchProductDetail(productId: string) {
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
   const product = await fetchProductDetail(id);
@@ -27,7 +27,7 @@ export default async function ProductDetailPage({
   return (
     <div className="container mx-auto px-4 py-8">
       {/* 🛍️ Product Detail Card */}
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden grid grid-cols-2 md:grid-cols-2 gap-6 p-6">
         {/* 🖼️ Product Image */}
         <div className="flex w-full h-full justify-center items-center relative">
           <Image

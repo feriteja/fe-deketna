@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCart } from "@/hooks/useCart";
-import { ReduxCartItem } from "@/store/slices/cartSlice";
 import axios from "axios";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const CartPage = () => {
   const { cartItems, toggleSelection, reloadCart, toggleSelectAll } = useCart();

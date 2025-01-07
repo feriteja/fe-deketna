@@ -1,8 +1,8 @@
 "use client";
 
 import ProductCard from "@/components/ProductCard";
-import { useState, useEffect, useCallback } from "react";
 import debounce from "lodash.debounce";
+import { useCallback, useEffect, useState } from "react";
 
 interface Product {
   id: number;
@@ -25,8 +25,10 @@ interface ProductResponse {
 // ✅ Client-Side Component with Infinite Scroll
 export default function ClientDashboard({
   initialData,
+  keyword,
 }: {
   initialData: ProductResponse;
+  keyword: string;
 }) {
   const [products, setProducts] = useState<Product[]>(initialData.data);
   const [page, setPage] = useState<number>(initialData.pagination.page);
@@ -42,7 +44,9 @@ export default function ClientDashboard({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/products?page=${page + 1}&limit=20`,
+        `http://localhost:8080/products?page=${
+          page + 1
+        }&limit=20&search_product=${keyword}`,
         {
           method: "GET",
           headers: {
@@ -79,11 +83,17 @@ export default function ClientDashboard({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loadMoreProducts]);
 
+  useEffect(() => {
+    setProducts(initialData.data);
+  }, [keyword]);
+
+  // console.log({ product: products?.slice(0, 4), keyword });
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Product Dashboard</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {products.map((product) => (
+        {products?.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>

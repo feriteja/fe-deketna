@@ -55,7 +55,7 @@ async function fetchOrderDetails(id: string): Promise<ApiResponse> {
 export default async function OrderDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   let order: OrderDetail | null = null;
   let error: string | null = null;
@@ -65,8 +65,8 @@ export default async function OrderDetailPage({
 
     const res = await fetchOrderDetails(id);
     order = res.data;
-    console.log({ order });
   } catch (err: any) {
+    console.log(err);
     error = err.message || "Something went wrong";
   }
 

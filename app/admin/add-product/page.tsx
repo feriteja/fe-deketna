@@ -6,7 +6,7 @@ import * as z from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { compressImage, convertToWebP } from "@/utils/imageConverterWebp";
@@ -26,7 +26,7 @@ export default function AddProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const accessToken = localStorage.getItem("access_token");
+  const [accessToken, setaccessToken] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
 
   const {
@@ -91,6 +91,13 @@ export default function AddProductPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem("access_token");
+    if (savedToken && !accessToken) {
+      setaccessToken(savedToken);
+    }
+  }, []);
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-md shadow-md">
